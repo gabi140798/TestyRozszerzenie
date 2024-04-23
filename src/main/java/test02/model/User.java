@@ -20,6 +20,10 @@ public class User {
     private String name;
     private String surname;
     private double balance;
+
+    @Version
+    private int version;
+
     @Column(nullable = false)
     private int transactionCounter = 0;
 
