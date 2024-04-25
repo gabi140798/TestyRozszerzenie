@@ -1,9 +1,9 @@
 package test02.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import test02.exceptions.InsufficientFundsException;
 import test02.exceptions.UserNotFoundException;
 import test02.model.Transaction;
@@ -25,23 +25,27 @@ public class TransactionService {
 
     @Transactional
     public void transferMoney(Long fromUserId, Long toUserId, double amount) throws InsufficientFundsException {
-        User sender = userRepository.findByIdForUpdate(fromUserId)
-                .orElseThrow(() -> new UserNotFoundException("Sender not found with id: " + fromUserId));
-        User recipient = userRepository.findByIdForUpdate(toUserId)
-                .orElseThrow(() -> new UserNotFoundException("Recipient not found with id: " + toUserId));
+        Long lowerId = Math.min(fromUserId, toUserId);
+        Long higherId = Math.max(fromUserId, toUserId);
 
-        if (sender.getBalance() < amount) {
-            throw new InsufficientFundsException("Insufficient funds for this transaction.");
+        User user1 = userRepository.findByIdForUpdate(lowerId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + lowerId));
+        User user2 = userRepository.findByIdForUpdate(higherId)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + higherId));
+
+        User sender = user1.getId().equals(fromUserId) ? user1 : user2;
+        User receiver = user1.getId().equals(toUserId) ? user1 : user2;
+
+        if (sender.getBalance() >= amount) {
+            sender.setBalance(sender.getBalance() - amount);
+            receiver.setBalance(receiver.getBalance() + amount);
+        } else {
+            throw new InsufficientFundsException("Insufficient funds");
         }
-
-        sender.setBalance(sender.getBalance() - amount);
-        recipient.setBalance(recipient.getBalance() + amount);
-
-        userRepository.save(sender);
-        userRepository.save(recipient);
     }
 
-    public List<Transaction> findTransactions(TransactionCriteria criteria, User user) {
+
+        public List<Transaction> findTransactions(TransactionCriteria criteria, User user) {
         return transactionRepository.findByAmountBetweenAndDateBetweenAndUser(
                 criteria.getMinAmount(),
                 criteria.getMaxAmount(),

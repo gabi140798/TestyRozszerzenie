@@ -3,8 +3,8 @@ package test02.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,11 +24,8 @@ public class User {
     @Version
     private int version;
 
-    @Column(nullable = false)
-    private int transactionCounter = 0;
-
     @OneToMany(mappedBy = "user")
-    private List<Transaction> transactions = new ArrayList<>();
+    private Set<Transaction> transactions = new HashSet<>();
 
     public User(Long id, String name, String surname, double balance) {
         this.id = id;
