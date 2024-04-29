@@ -55,7 +55,7 @@ class UserServiceTest {
     @Test
     public void testGetUsersWithTransferCount() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        UserDto userDto = new UserDto(1L,"Kamil","Nowak",1000,0);
+        UserDto userDto = new UserDto(1L,"Kamil","Nowak",1000,null);
         Page<UserDto> expectedPage = new PageImpl<>(Collections.singletonList(userDto));
 
         when(userRepository.findAllUsersWithTransferCount(pageRequest)).thenReturn(expectedPage);

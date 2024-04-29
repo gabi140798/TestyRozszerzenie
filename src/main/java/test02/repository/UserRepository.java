@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Long id);
 
-    @Query("SELECT new package.UserDto(u.id, u.name, u.surname, u.balance, COUNT(t)) " +
+    @Query("SELECT new package.UserDto(u.id, u.name, u.surname, u.balance, COUNT(t.id) as transferCount) " +
             "FROM User u LEFT JOIN u.transactions t " +
             "GROUP BY u.id, u.name, u.surname, u.balance")
     Page<UserDto> findAllUsersWithTransferCount(Pageable pageable);
